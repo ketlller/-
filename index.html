@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Snake Game</title>
+    <title>Telegram Snake Game with Referrals</title>
     <style>
         body {
             display: flex;
@@ -45,6 +45,29 @@
             flex-direction: column;
             align-items: center;
         }
+        #referralButton {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #referralModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 2px solid #000;
+            padding: 20px;
+            text-align: center;
+            z-index: 1000;
+        }
+        #closeModal {
+            margin-top: 10px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +84,15 @@
             <button class="control-button" id="down">↓</button>
         </div>
     </div>
+    <button id="referralButton">Referral Info</button>
+
+    <div id="referralModal">
+        <h3>Referral Information</h3>
+        <p id="referralCount">Referrals: 0</p>
+        <p id="earnedPoints">Earned Points: 0</p>
+        <button id="closeModal">Close</button>
+    </div>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         Telegram.WebApp.ready();
@@ -82,8 +114,10 @@
         const tileSize = canvas.width / gridSize;
         let snake = [{ x: 10, y: 10 }];
         let direction = { x: 0, y: 0 };
-        let apple = { x: 15, y: 15 };
+        let apple = { x: 15, y: 15 }];
         let score = 0;
+        let referrals = 0; // Add referral count
+        let earnedPoints = 0; // Add earned points
 
         function gameLoop() {
             moveSnake();
@@ -128,8 +162,10 @@
             snake = [{ x: 10, y: 10 }];
             direction = { x: 0, y: 0 };
             apple = { x: 15, y: 15 };
+            earnedPoints += score;
             score = 0;
             scoreElement.textContent = `Score: ${score}`;
+            updateReferralInfo();
         }
 
         function hasEatenApple() {
@@ -192,6 +228,27 @@
                     break;
             }
         });
+
+        const referralButton = document.getElementById('referralButton');
+        const referralModal = document.getElementById('referralModal');
+        const closeModal = document.getElementById('closeModal');
+        const referralCountElement = document.getElementById('referralCount');
+        const earnedPointsElement = document.getElementById('earnedPoints');
+
+        referralButton.addEventListener('click', () => {
+            updateReferralInfo();
+            referralModal.style.display = 'block';
+        });
+
+        closeModal.addEventListener('click', () => {
+            referralModal.style.display = 'none';
+        });
+
+        function updateReferralInfo() {
+            // Here you would fetch the referral data from your backend or update it accordingly
+            referralCountElement.textContent = `Referrals: ${referrals}`;
+            earnedPointsElement.textContent = `Earned Points: ${earnedPoints}`;
+        }
 
         gameLoop();
     </script>
