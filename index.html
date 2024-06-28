@@ -23,8 +23,8 @@
         }
         .controls {
             display: flex;
-            justify-content: center;
-            gap: 50px;
+            justify-content: space-between;
+            width: 400px;
             margin-top: 20px;
         }
         .control-button {
@@ -35,13 +35,7 @@
             font-size: 18px;
             cursor: pointer;
         }
-        .left-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-        .right-controls {
+        .side-controls {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -77,13 +71,15 @@
     <div class="score" id="score">Score: 0</div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <div class="controls">
-        <div class="left-controls">
+        <div class="side-controls">
             <button class="control-button" id="left">←</button>
-            <button class="control-button" id="right">→</button>
         </div>
-        <div class="right-controls">
+        <div>
             <button class="control-button" id="up">↑</button>
             <button class="control-button" id="down">↓</button>
+        </div>
+        <div class="side-controls">
+            <button class="control-button" id="right">→</button>
         </div>
     </div>
     <button id="referralButton">Referral Info</button>
@@ -92,7 +88,9 @@
         <h3>Referral Information</h3>
         <p id="referralCount">Referrals: 0</p>
         <p id="earnedPoints">Earned Points: 0</p>
-        <p id="referralLink">Referral Link: <a href="#" id="referralUrl">Your Referral Link</a></p>
+        <p>Referral Link: <a href="#" id="referralUrl">Your Telegram Referral Link</a></p>
+        <p>Referrals:</p>
+        <ul id="referralList"></ul>
         <button id="closeModal">Close</button>
     </div>
 
@@ -121,6 +119,7 @@
         let score = 0;
         let referrals = 0; // Add referral count
         let earnedPoints = 0; // Add earned points
+        const referralList = []; // List to store referral users
 
         function gameLoop() {
             moveSnake();
@@ -238,6 +237,7 @@
         const referralCountElement = document.getElementById('referralCount');
         const earnedPointsElement = document.getElementById('earnedPoints');
         const referralUrlElement = document.getElementById('referralUrl');
+        const referralListElement = document.getElementById('referralList');
 
         referralButton.addEventListener('click', () => {
             updateReferralInfo();
@@ -248,15 +248,19 @@
             referralModal.style.display = 'none';
         });
 
+        
         function updateReferralInfo() {
             // Here you would fetch the referral data from your backend or update it accordingly
-            referralCountElement.textContent = `Referrals: ${referrals}`;
-            earnedPointsElement.textContent = `Earned Points: ${earnedPoints}`;
-            referralUrlElement.href = `https://yourwebsite.com/referral/${user.username}`;
-            referralUrlElement.textContent = `https://yourwebsite.com/referral/${user.username}`;
-        }
+            eferralUrlElement.href = `https://t.me/Tester_tapalka_bot?start=${user.id}`; // Replace with your bot username and the parameter for referral tracking
+            referralListElement.innerHTML = ''; // Clear previous referral list
 
-        gameLoop();
+            // Assuming referralList is an array of usernames or IDs
+            referralList.forEach((referral) => {
+                const li = document.createElement('li');
+                li.textContent = referral;
+                referralListElement.appendChild(li);
+            });
+        }
     </script>
 </body>
 </html>
