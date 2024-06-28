@@ -17,3 +17,10 @@ body {
 #gameCanvas {
     border: 1px solid #000;
 }
+
+#scoreboard {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+}
