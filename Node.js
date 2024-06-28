@@ -19,7 +19,7 @@ const User = mongoose.model('User', userSchema);
 app.use(bodyParser.json());
 
 // Telegram Bot setup
-const bot = new Telegraf('YOUR_BOT_API_KEY');
+const bot = new Telegraf('7211914916:AAFih8y3EyEpgyXMD6WLHqdUcc00fCSf2ng');
 
 bot.start((ctx) => {
     ctx.reply(`Welcome ${ctx.from.username}!`);
