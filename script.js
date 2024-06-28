@@ -1,7 +1,13 @@
 document.getElementById('play').addEventListener('click', function() {
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('game').style.display = 'block';
-    startGame();
+    const username = document.getElementById('username').value;
+    if (username) {
+        document.getElementById('displayUsername').innerText = `Username: ${username}`;
+        document.getElementById('menu').style.display = 'none';
+        document.getElementById('game').style.display = 'block';
+        startGame();
+    } else {
+        alert('Please enter your Telegram username');
+    }
 });
 
 const canvas = document.getElementById('gameCanvas');
@@ -11,13 +17,14 @@ let snake = [{ x: 200, y: 200 }];
 let direction = 'right';
 let food = { x: 100, y: 100 };
 let score = 0;
+let gameInterval;
 
 function startGame() {
     document.getElementById('up').addEventListener('click', () => direction = 'up');
     document.getElementById('left').addEventListener('click', () => direction = 'left');
     document.getElementById('down').addEventListener('click', () => direction = 'down');
     document.getElementById('right').addEventListener('click', () => direction = 'right');
-    setInterval(gameLoop, 100);
+    gameInterval = setInterval(gameLoop, 100);
 }
 
 function gameLoop() {
@@ -35,6 +42,7 @@ function update() {
     snake.unshift(head);
     if (head.x === food.x && head.y === food.y) {
         score += 10;
+        document.getElementById('score').innerText = score;
         placeFood();
     } else {
         snake.pop();
@@ -47,8 +55,6 @@ function draw() {
     snake.forEach(part => ctx.fillRect(part.x, part.y, 20, 20));
     ctx.fillStyle = 'red';
     ctx.fillRect(food.x, food.y, 20, 20);
-    ctx.fillStyle = 'black';
-    ctx.fillText(`Score: ${score}`, 10, 10);
 }
 
 function placeFood() {
@@ -58,16 +64,27 @@ function placeFood() {
 
 function checkGameOver() {
     const head = snake[0];
-    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || checkCollision()) {
+        clearInterval(gameInterval);
         alert('Game Over');
         resetGame();
     }
+}
+
+function checkCollision() {
+    for (let i = 1; i < snake.length; i++) {
+        if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function resetGame() {
     snake = [{ x: 200, y: 200 }];
     direction = 'right';
     score = 0;
+    document.getElementById('score').innerText = score;
     placeFood();
     document.getElementById('menu').style.display = 'block';
     document.getElementById('game').style.display = 'none';
@@ -75,11 +92,12 @@ function resetGame() {
 }
 
 function saveScore() {
+    const username = document.getElementById('username').value;
     fetch('/saveScore', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ score }),
+        body: JSON.stringify({ score, username }),
     }).then(response => response.json()).then(data => console.log(data));
 }
