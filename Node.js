@@ -9,13 +9,14 @@ mongoose.connect('mongodb://localhost:27017/snake_game', { useNewUrlParser: true
 
 const scoreSchema = new mongoose.Schema({
     score: Number,
+    username: String,
 });
 
 const Score = mongoose.model('Score', scoreSchema);
 
 app.post('/saveScore', async (req, res) => {
-    const { score } = req.body;
-    const newScore = new Score({ score });
+    const { score, username } = req.body;
+    const newScore = new Score({ score, username });
     await newScore.save();
     res.json({ message: 'Score saved' });
 });
