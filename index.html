@@ -3,23 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Game with Referrals</title>
+    <title>Snake Game</title>
     <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        body, html {
             margin: 0;
-            background-color: #f0f0f0;
-        }
-        .button-container {
+            padding: 0;
+            overflow: hidden;
             display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            background: url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
         }
-        .button {
+        #gameCanvas {
+            border: 1px solid #000;
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        #controls {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 0;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
@@ -27,117 +40,114 @@
     </style>
 </head>
 <body>
-    <div class="button-container">
-        <button class="button" id="playButton">Играть</button>
-        <button class="button" id="referralButton">Рефералы</button>
-        <button class="button" id="tasksButton">Задания</button>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div id="controls">
+        <button class="btn" onclick="startGame()">Играть</button>
+        <button class="btn" onclick="mining()">Майнинг</button>
+        <button class="btn" onclick="tasks()">Задания</button>
+        <button class="btn" onclick="referrals()">Рефералы</button>
     </div>
 
-    <div id="gameContainer" style="display: none;">
-        <!-- Placeholder for game content -->
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-        <div class="controls">
-            <!-- Game controls -->
-            <div class="side-controls">
-                <button class="control-button" id="left">←</button>
-            </div>
-            <div>
-                <button class="control-button" id="up">↑</button>
-                <button class="control-button" id="down">↓</button>
-            </div>
-            <div class="side-controls">
-                <button class="control-button" id="right">→</button>
-            </div>
-        </div>
-        <div class="user-info" id="userInfo"></div>
-        <div class="score" id="score">Score: 0</div>
-    </div>
-
-    <div id="referralModal" style="display: none;">
-        <!-- Modal for referral information -->
-        <h3>Referral Information</h3>
-        <p id="referralCount">Referrals: 0</p>
-        <p id="earnedPoints">Earned Points: 0</p>
-        <p>Referral Link: <a href="#" id="referralUrl">Your Telegram Referral Link</a></p>
-        <ul id="referralList"></ul>
-        <button id="closeModal">Close</button>
-    </div>
-
-    <div id="tasksContainer" style="display: none;">
-        <!-- Placeholder for tasks content -->
-        <h2>Задания</h2>
-        <p>Здесь будут отображаться ваши задания...</p>
-    </div>
-
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-        Telegram.WebApp.ready();
+        let canvas = document.getElementById('gameCanvas');
+        let ctx = canvas.getContext('2d');
+        let snake = [{x: 200, y: 200}];
+        let direction = {x: 10, y: 0};
+        let food = {x: Math.floor(Math.random() * 40) * 10, y: Math.floor(Math.random() * 40) * 10};
+        let score = 0;
+        let interval;
 
-        const user = Telegram.WebApp.initDataUnsafe.user;
-        const userInfoDiv = document.getElementById('userInfo');
-        userInfoDiv.innerHTML = `
-            <h3>User Information</h3>
-            <p>Username: ${user.username}</p>
-            <p>First Name: ${user.first_name}</p>
-            <p>Last Name: ${user.last_name}</p>
-        `;
-
-        const playButton = document.getElementById('playButton');
-        const gameContainer = document.getElementById('gameContainer');
-        const referralButton = document.getElementById('referralButton');
-        const referralModal = document.getElementById('referralModal');
-        const tasksButton = document.getElementById('tasksButton');
-        const tasksContainer = document.getElementById('tasksContainer');
-
-        playButton.addEventListener('click', () => {
-            gameContainer.style.display = 'block';
-            referralModal.style.display = 'none';
-            tasksContainer.style.display = 'none';
-            // Place game initialization logic here
-            initializeGame();
-        });
-
-        referralButton.addEventListener('click', () => {
-            gameContainer.style.display = 'none';
-            referralModal.style.display = 'block';
-            tasksContainer.style.display = 'none';
-            updateReferralInfo();
-        });
-
-        tasksButton.addEventListener('click', () => {
-            gameContainer.style.display = 'none';
-            referralModal.style.display = 'none';
-            tasksContainer.style.display = 'block';
-        });
-
-        function initializeGame() {
-            // Game initialization logic here
-            // For example, setting up canvas, controls, etc.
-            const canvas = document.getElementById('gameCanvas');
-            const context = canvas.getContext('2d');
-            const scoreElement = document.getElementById('score');
-            // Add game logic here
+        function drawSnake() {
+            ctx.fillStyle = 'green';
+            snake.forEach(part => {
+                ctx.fillRect(part.x, part.y, 10, 10);
+            });
         }
 
-        function updateReferralInfo() {
-            // Referral information update logic here
-            // Fetch data from backend or update as necessary
-            const referralCountElement = document.getElementById('referralCount');
-            const earnedPointsElement = document.getElementById('earnedPoints');
-            const referralUrlElement = document.getElementById('referralUrl');
-            const referralListElement = document.getElementById('referralList');
+        function moveSnake() {
+            const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                food = {x: Math.floor(Math.random() * 40) * 10, y: Math.floor(Math.random() * 40) * 10};
+            } else {
+                snake.pop();
+            }
+        }
 
-            referralCountElement.textContent = `Referrals: ${referrals}`;
-            earnedPointsElement.textContent = `Earned Points: ${earnedPoints}`;
-            referralUrlElement.href = `https://t.me/Tester_tapalka_bot?start=${user.id}`; // Replace with your bot username and referral parameter
-            referralListElement.innerHTML = ''; // Clear previous list
+        function drawFood() {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(food.x, food.y, 10, 10);
+        }
 
-            // Example: Add referral list items
-            // referralList.forEach(referral => {
-            //     const li = document.createElement('li');
-            //     li.textContent = referral;
-            //     referralListElement.appendChild(li);
-            // });
+        function update() {
+            if (snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height || snakeCollision()) {
+                clearInterval(interval);
+                alert(`Game Over! Your score is ${score}`);
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawFood();
+            moveSnake();
+            drawSnake();
+        }
+
+        function snakeCollision() {
+            for (let i = 4; i < snake.length; i++) {
+                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
+            }
+            return false;
+        }
+
+        document.addEventListener('keydown', changeDirection);
+
+        function changeDirection(event) {
+            const LEFT_KEY = 37;
+            const RIGHT_KEY = 39;
+            const UP_KEY = 38;
+            const DOWN_KEY = 40;
+
+            const keyPressed = event.keyCode;
+            const goingUp = direction.y === -10;
+            const goingDown = direction.y === 10;
+            const goingRight = direction.x === 10;
+            const goingLeft = direction.x === -10;
+
+            if (keyPressed === LEFT_KEY && !goingRight) {
+                direction = {x: -10, y: 0};
+            }
+            if (keyPressed === UP_KEY && !goingDown) {
+                direction = {x: 0, y: -10};
+            }
+            if (keyPressed === RIGHT_KEY && !goingLeft) {
+                direction = {x: 10, y: 0};
+            }
+            if (keyPressed === DOWN_KEY && !goingUp) {
+                direction = {x: 0, y: 10};
+            }
+        }
+
+        function startGame() {
+            snake = [{x: 200, y: 200}];
+            direction = {x: 10, y: 0};
+            score = 0;
+            clearInterval(interval);
+            interval = setInterval(update, 100);
+        }
+
+        function mining() {
+            // Реализация функции майнинга
+            alert('Майнинг пока не реализован.');
+        }
+
+        function tasks() {
+            // Реализация функции заданий
+            alert('Задания пока не реализованы.');
+        }
+
+        function referrals() {
+            // Реализация реферальной системы
+            alert('Реферальная система пока не реализована.');
         }
     </script>
 </body>
