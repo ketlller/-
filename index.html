@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Snake Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        canvas {
+            border: 2px solid #000;
+        }
+        .user-info {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="user-info" id="userInfo"></div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script>
+        Telegram.WebApp.ready();
+
+        const user = Telegram.WebApp.initDataUnsafe.user;
+        const userInfoDiv = document.getElementById('userInfo');
+        userInfoDiv.innerHTML = `
+            <h3>User Information</h3>
+            <p>Username: ${user.username}</p>
+            <p>First Name: ${user.first_name}</p>
+            <p>Last Name: ${user.last_name}</p>
+        `;
+
+        const canvas = document.getElementById('gameCanvas');
+        const context = canvas.getContext('2d');
+
+        const gridSize = 20;
+        const tileSize = canvas.width / gridSize;
+        let snake = [{ x: 10, y: 10 }];
+        let direction = { x: 0, y: 0 };
+        let apple = { x: 15, y: 15 };
+        let score = 0;
+
+        function gameLoop() {
+            moveSnake();
+            if (isGameOver()) {
+                resetGame();
+            } else {
+                if (hasEatenApple()) {
+                    score++;
+                    snake.push({});
+                    placeApple();
+                }
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                drawSnake();
+                drawApple();
+                setTimeout(gameLoop, 100);
+            }
+        }
+
+        function moveSnake() {
+            for (let i = snake.length - 1; i > 0; i--) {
+                snake[i] = { ...snake[i - 1] };
+            }
+            snake[0].x += direction.x;
+            snake[0].y += direction.y;
+        }
+
+        function isGameOver() {
+            const head = snake[0];
+            if (head.x < 0 || head.x >= gridSize || head.y < 0 || head.y >= gridSize) {
+                return true;
+            }
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function resetGame() {
+            snake = [{ x: 10, y: 10 }];
+            direction = { x: 0, y: 0 };
+            apple = { x: 15, y: 15 };
+            score = 0;
+        }
+
+        function hasEatenApple() {
+            const head = snake[0];
+            return head.x === apple.x && head.y === apple.y;
+        }
+
+        function placeApple() {
+            apple.x = Math.floor(Math.random() * gridSize);
+            apple.y = Math.floor(Math.random() * gridSize);
+        }
+
+        function drawSnake() {
+            context.fillStyle = 'green';
+            for (const segment of snake) {
+                context.fillRect(segment.x * tileSize, segment.y * tileSize, tileSize, tileSize);
+            }
+        }
+
+        function drawApple() {
+            context.fillStyle = 'red';
+            context.fillRect(apple.x * tileSize, apple.y * tileSize, tileSize, tileSize);
+        }
+
+        document.addEventListener('keydown', (event) => {
+            switch (event.key) {
+                case 'ArrowUp':
+                    if (direction.y === 0) direction = { x: 0, y: -1 };
+                    break;
+                case 'ArrowDown':
+                    if (direction.y === 0) direction = { x: 0, y: 1 };
+                    break;
+                case 'ArrowLeft':
+                    if (direction.x === 0) direction = { x: -1, y: 0 };
+                    break;
+                case 'ArrowRight':
+                    if (direction.x === 0) direction = { x: 1, y: 0 };
+                    break;
+            }
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
