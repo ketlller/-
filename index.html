@@ -3,30 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
+    <title>Snake Game WebApp</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="menu">
-        <input type="text" id="username" placeholder="Enter your Telegram username">
-        <button id="play">Играть</button>
-        <button id="wallet">Кошелек</button>
-        <button id="tasks">Задания</button>
-        <button id="referrals">Рефералы</button>
+    <div id="main-menu" class="active">
+        <button onclick="navigateTo('play')">Играть</button>
+        <button onclick="navigateTo('wallet')">Кошелек</button>
+        <button onclick="navigateTo('tasks')">Задания</button>
+        <button onclick="navigateTo('referrals')">Рефералы</button>
     </div>
-    <div id="game" style="display: none;">
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <div id="play" class="page">
+        <button onclick="navigateTo('main-menu')">Назад в меню</button>
+        <canvas id="snake-game"></canvas>
         <div id="controls">
-            <button id="up">Вверх</button>
-            <button id="left">Влево</button>
-            <button id="down">Вниз</button>
-            <button id="right">Вправо</button>
+            <button onclick="moveSnake('up')">Up</button>
+            <button onclick="moveSnake('down')">Down</button>
+            <button onclick="moveSnake('left')">Left</button>
+            <button onclick="moveSnake('right')">Right</button>
         </div>
-        <div id="scoreboard">
-            <p id="displayUsername"></p>
-            <p>Score: <span id="score">0</span></p>
-        </div>
+        <div id="coins">Монетки: <span id="coin-count">0</span></div>
     </div>
+
+    <div id="wallet" class="page">
+        <h1>Кошелек</h1>
+        <p>Баланс: <span id="wallet-balance">0 USDT</span></p>
+        <button onclick="recharge()">Пополнить</button>
+        <button onclick="withdraw()">Вывести</button>
+    </div>
+
+    <div id="tasks" class="page">
+        <h1>Задания</h1>
+        <ul id="task-list">
+            <!-- Задания будут добавляться сюда -->
+        </ul>
+    </div>
+
+    <div id="referrals" class="page">
+        <h1>Рефералы</h1>
+        <ul id="referral-list">
+            <!-- Рефералы будут добавляться сюда -->
+        </ul>
+    </div>
+
+    <div id="telegram" class="page">
+        <h1>Telegram</h1>
+        <div id="telegram-username">Ваш Telegram: <span id="tg-username"></span></div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
