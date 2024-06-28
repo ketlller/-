@@ -37,9 +37,19 @@
             font-size: 16px;
             cursor: pointer;
         }
+        #username {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
+    <div id="username"></div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <div id="controls">
         <button class="btn" onclick="startGame()">Играть</button>
@@ -49,6 +59,10 @@
     </div>
 
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const username = urlParams.get('username') || 'Guest';
+        document.getElementById('username').innerText = `Hello, ${username}!`;
+
         let canvas = document.getElementById('gameCanvas');
         let ctx = canvas.getContext('2d');
         let snake = [{x: 200, y: 200}];
@@ -157,4 +171,4 @@
         });
     </script>
 </body>
-</html
+</html>
