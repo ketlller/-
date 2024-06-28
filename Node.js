@@ -1,57 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game WebApp</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div id="main-menu" class="active">
-        <button onclick="navigateTo('play')">Играть</button>
-        <button onclick="navigateTo('wallet')">Кошелек</button>
-        <button onclick="navigateTo('tasks')">Задания</button>
-        <button onclick="navigateTo('referrals')">Рефералы</button>
-    </div>
+const express = require('express');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+const { Telegraf } = require('telegraf');
 
-    <div id="play" class="page">
-        <button onclick="navigateTo('main-menu')">Назад в меню</button>
-        <canvas id="snake-game"></canvas>
-        <div id="controls">
-            <button onclick="moveSnake('up')">Up</button>
-            <button onclick="moveSnake('down')">Down</button>
-            <button onclick="moveSnake('left')">Left</button>
-            <button onclick="moveSnake('right')">Right</button>
-        </div>
-        <div id="coins">Монетки: <span id="coin-count">0</span></div>
-    </div>
+const app = express();
+const port = 3000;
 
-    <div id="wallet" class="page">
-        <h1>Кошелек</h1>
-        <p>Баланс: <span id="wallet-balance">0 USDT</span></p>
-        <button onclick="recharge()">Пополнить</button>
-        <button onclick="withdraw()">Вывести</button>
-    </div>
+mongoose.connect('mongodb://localhost/snakegame', { useNewUrlParser: true, useUnifiedTopology: true });
 
-    <div id="tasks" class="page">
-        <h1>Задания</h1>
-        <ul id="task-list">
-            <!-- Задания будут добавляться сюда -->
-        </ul>
-    </div>
+const userSchema = new mongoose.Schema({
+    username: String,
+    coins: Number,
+    referrals: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+});
 
-    <div id="referrals" class="page">
-        <h1>Рефералы</h1>
-        <ul id="referral-list">
-            <!-- Рефералы будут добавляться сюда -->
-        </ul>
-    </div>
+const User = mongoose.model('User', userSchema);
 
-    <div id="telegram" class="page">
-        <h1>Telegram</h1>
-        <div id="telegram-username">Ваш Telegram: <span id="tg-username"></span></div>
-    </div>
+app.use(bodyParser.json());
 
-    <script src="script.js"></script>
-</body>
-</html>
+// Telegram Bot setup
+const bot = new Telegraf('7211914916:AAFih8y3EyEpgyXMD6WLHqdUcc00fCSf2ng');
+
+bot.start((ctx) => {
+    ctx.reply(`Welcome ${ctx.from.username}!`);
+    // Save user to database or update existing user
+    User.findOneAndUpdate(
+        { username: ctx.from.username },
+        { username: ctx.from.username },
+        { upsert: true, new: true },
+        (err, user) => {
+            if (err) console.error(err);
+        }
+    );
+});
+
+bot.launch();
+
+app.get('/user/:id', (req, res) => {
+    User.findById(req.params.id, (err, user) => {
+        if (err) return res.status(500).send(err);
+        res.json(user);
+    });
+});
+
+app.post('/user/:id/coins', (req, res) => {
+    User.findById(req.params.id, (err, user) => {
+        if (err) return res.status(500).send(err);
+        user.coins = req.body.coins;
+        user.save(err => {
+            if (err) return res.status(500).send(err);
+            res.json(user);
+        });
+    });
+});
+
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
