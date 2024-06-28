@@ -149,6 +149,12 @@
             // Реализация реферальной системы
             alert('Реферальная система пока не реализована.');
         }
+
+        Telegram.WebApp.ready();
+
+        Telegram.WebApp.onEvent('mainButtonClicked', function() {
+            Telegram.WebApp.sendData(JSON.stringify({event: 'mainButtonClicked'}));
+        });
     </script>
 </body>
-</html>
+</html
