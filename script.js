@@ -1,103 +1,56 @@
-document.getElementById('play').addEventListener('click', function() {
-    const username = document.getElementById('username').value;
-    if (username) {
-        document.getElementById('displayUsername').innerText = `Username: ${username}`;
-        document.getElementById('menu').style.display = 'none';
-        document.getElementById('game').style.display = 'block';
-        startGame();
-    } else {
-        alert('Please enter your Telegram username');
-    }
+let currentCoins = 0;
+
+function navigateTo(page) {
+    document.querySelectorAll('.page, #main-menu').forEach(el => el.classList.remove('active'));
+    document.getElementById(page).classList.add('active');
+}
+
+function moveSnake(direction) {
+    // Логика управления змейкой
+}
+
+function updateCoinCount() {
+    document.getElementById('coin-count').innerText = currentCoins;
+}
+
+function recharge() {
+    // Логика пополнения баланса
+}
+
+function withdraw() {
+    // Логика вывода средств
+}
+
+// Пример функции для запуска игры
+function startGame() {
+    navigateTo('play');
+    // Инициализация и запуск игры "Змейка"
+}
+
+// Пример функции для сохранения монеток в базу данных
+function saveCoins() {
+    // Логика сохранения монеток в базу данных
+}
+
+// Пример функции для загрузки монеток из базы данных при запуске
+function loadCoins() {
+    // Логика загрузки монеток из базы данных
+    currentCoins = 10; // Пример значения
+    updateCoinCount();
+}
+
+// Запуск приложения
+document.addEventListener('DOMContentLoaded', () => {
+    navigateTo('main-menu');
+    loadCoins();
 });
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-let snake = [{ x: 200, y: 200 }];
-let direction = 'right';
-let food = { x: 100, y: 100 };
-let score = 0;
-let gameInterval;
-
-function startGame() {
-    document.getElementById('up').addEventListener('click', () => direction = 'up');
-    document.getElementById('left').addEventListener('click', () => direction = 'left');
-    document.getElementById('down').addEventListener('click', () => direction = 'down');
-    document.getElementById('right').addEventListener('click', () => direction = 'right');
-    gameInterval = setInterval(gameLoop, 100);
+// Функция для подключения к Telegram и получения username
+function connectToTelegram() {
+    // Логика подключения к Telegram и получения username
+    const tgUsername = "example_username"; // Пример значения
+    document.getElementById('tg-username').innerText = tgUsername;
 }
 
-function gameLoop() {
-    update();
-    draw();
-    checkGameOver();
-}
-
-function update() {
-    const head = { ...snake[0] };
-    if (direction === 'up') head.y -= 20;
-    if (direction === 'down') head.y += 20;
-    if (direction === 'left') head.x -= 20;
-    if (direction === 'right') head.x += 20;
-    snake.unshift(head);
-    if (head.x === food.x && head.y === food.y) {
-        score += 10;
-        document.getElementById('score').innerText = score;
-        placeFood();
-    } else {
-        snake.pop();
-    }
-}
-
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = 'green';
-    snake.forEach(part => ctx.fillRect(part.x, part.y, 20, 20));
-    ctx.fillStyle = 'red';
-    ctx.fillRect(food.x, food.y, 20, 20);
-}
-
-function placeFood() {
-    food.x = Math.floor(Math.random() * 20) * 20;
-    food.y = Math.floor(Math.random() * 20) * 20;
-}
-
-function checkGameOver() {
-    const head = snake[0];
-    if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || checkCollision()) {
-        clearInterval(gameInterval);
-        alert('Game Over');
-        resetGame();
-    }
-}
-
-function checkCollision() {
-    for (let i = 1; i < snake.length; i++) {
-        if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function resetGame() {
-    snake = [{ x: 200, y: 200 }];
-    direction = 'right';
-    score = 0;
-    document.getElementById('score').innerText = score;
-    placeFood();
-    document.getElementById('menu').style.display = 'block';
-    document.getElementById('game').style.display = 'none';
-    saveScore();
-}
-
-function saveScore() {
-    const username = document.getElementById('username').value;
-    fetch('/saveScore', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ score, username }),
-    }).then(response => response.json()).then(data => console.log(data));
-}
+// Подключение к Telegram при загрузке страницы
+connectToTelegram();
